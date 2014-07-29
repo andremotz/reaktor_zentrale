@@ -17,7 +17,7 @@ public class FileHandler {
 		
 	}
 
-	public String getContentfromFile(String filename) {
+	public static String getContentfromFile(String filename) {
 		String fileContent = null;
 		FileInputStream fstream = null;
 		

@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Properties;
 
 import com.andremotz.reaktor.dao.Calculator;
-import com.andremotz.reaktor.dao.DatabaseHandler;
 import com.andremotz.reaktor.dao.FileHandler;
 import com.andremotz.reaktor.dao.GlobalData;
 import com.andremotz.reaktor.dao.Zielwert;
@@ -23,7 +22,6 @@ public class ReaktorSessionService {
 
 	private String scriptpath;
 	FileHandler fileHandler;
-	DatabaseHandler dbHandler;
 	Calculator calculator;
 
 	private int globalTakt = 5;
@@ -31,9 +29,6 @@ public class ReaktorSessionService {
 	public int getGlobalTakt() {
 		return globalTakt;
 	}
-
-	GlobalData globalData;
-	ArrayList<Zielwert> zielwerte;
 
 	Float tempInnen;
 	Float tempAussen;
@@ -52,7 +47,6 @@ public class ReaktorSessionService {
 	ReaktorSessionService() {
 		getProperties();
 		
-		dbHandler = new DatabaseHandler();
 		fileHandler = new FileHandler();
 		calculator = new Calculator();
 
@@ -61,21 +55,10 @@ public class ReaktorSessionService {
 
 		isHeating = false;
 
-		globalData = dbHandler.getGlobalData();
-		zielwerte = dbHandler.getZielwerte();
-	}
-
-	public GlobalData getGlobalData() {
-		globalData = dbHandler.getGlobalData();
-		return globalData;
-	}
-
-	public void setGlobalData(GlobalData globalData) {
-		this.globalData = globalData;
 	}
 
 	String getSensorsAverage() {
-		return fileHandler.getContentfromFile(fileSensorsAverage);
+		return FileHandler.getContentfromFile(fileSensorsAverage);
 	}
 
 	/*
@@ -100,8 +83,8 @@ public class ReaktorSessionService {
 			prop.load(input);
 
 			// get the property values
-			scriptpath = prop.getProperty("scriptpath");
-			fileSensorsAverage = prop.getProperty("fileSensorsAverage");
+			this.scriptpath = prop.getProperty("scriptPath");
+			this.fileSensorsAverage = prop.getProperty("fileSensorsAverage");
 
 		} catch (IOException ex) {
 			ex.printStackTrace();
@@ -170,8 +153,11 @@ public class ReaktorSessionService {
 	}
 
 	public void circuitGo() {
+		ArrayList<Zielwert> zielwerte = GlobalData.getZielwerte();
+		
+		GlobalData.updateGlobalData();
 
-		if (globalData.getIsRunning()) {
+		if (GlobalData.getIsRunning()) {
 
 			// wenn secondsCompleted mehr ist als gesamt, dann aus
 
@@ -181,7 +167,7 @@ public class ReaktorSessionService {
 						+ zielwerte.get(i).getSeconds();
 			}
 
-			if (globalData.getSecondsCompleted() > secondsCompletedGesamt) {
+			if (GlobalData.getSecondsCompleted() > secondsCompletedGesamt) {
 				isHeating = false;
 				switchArduino();
 			}
@@ -196,7 +182,7 @@ public class ReaktorSessionService {
 
 			}
 
-			int secondsCompleted = globalData.getSecondsCompleted();
+			int secondsCompleted = GlobalData.getSecondsCompleted();
 			int currentLevel = getLevelFromSecondsCompleted(secondsCompleted,
 					zielwerte);
 			currentZielTemp = getCelsiusFromLevel(currentLevel, zielwerte);
@@ -208,11 +194,12 @@ public class ReaktorSessionService {
 
 				// Sind wir im gr??nen Bereich?
 				if (tempAussen > currentZielTemp - 2
-						&& tempAussen < currentZielTemp + 10) {
-					int newSecondsCompleted = dbHandler.getGlobalData()
+						&& tempAussen < currentZielTemp + 100) {
+					
+					int newSecondsCompleted = GlobalData
 							.getSecondsCompleted() + globalTakt;
-					globalData.setSecondsCompleted(newSecondsCompleted);
-					dbHandler.setSecondsCompleted(newSecondsCompleted);
+					
+					GlobalData.setSecondsCompleted(newSecondsCompleted);
 				}
 			}
 
@@ -225,8 +212,8 @@ public class ReaktorSessionService {
 		String timestamp = calculator.getCurrentTimestamp();
 
 		// Logging
-		dbHandler.saveSensorDataToDB(timestamp, tempAussen, tempInnen,
-				globalData.getIsRunning(), isHeating, currentZielTemp);
+		GlobalData.saveSensorDataToDB(timestamp, tempAussen, tempInnen,
+				GlobalData.getIsRunning(), isHeating, currentZielTemp);
 
 	}
 

@@ -11,6 +11,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.andremotz.reaktor.dao.GlobalData;
+
 
 /**
  * Servlet implementation class ReaktorSession
@@ -78,11 +80,11 @@ public class ReaktorSessionServlet extends HttpServlet {
 		
 
 		writer.println("<ul>" + "<li>comment: "
-				+ reaktorSessionService.getGlobalData().getComment() + "</li> "
+				+ GlobalData.getComment() + "</li> "
 				+ "<li>isRunning: "
-				+ String.valueOf(reaktorSessionService.getGlobalData().getIsRunning()) + "</li> " 
+				+ String.valueOf(GlobalData.getIsRunning()) + "</li> " 
 				+ "<li>secondsCompleted: "
-				+ String.valueOf(reaktorSessionService.getGlobalData().getSecondsCompleted()) + "</li> " 
+				+ String.valueOf(GlobalData.getSecondsCompleted()) + "</li> " 
 				+ "<li>is heating: " + String.valueOf(reaktorSessionService.getIsHeating()) + "</li>" +
 				"<li>Aktuelle Zieltemperatur: " + String.valueOf(reaktorSessionService.getCurrentZieltemp()) + "</li>" +
 				"</ul>");
