@@ -80,7 +80,7 @@ public class ReaktorSessionService {
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
 		}
-
+		
 	}
 
 	public int getGlobalTakt() {

@@ -50,12 +50,6 @@ public class ReaktorSessionServlet extends HttpServlet {
 				"<meta charset='utf-8'> " +
 				"<meta http-equiv='refresh' content='" + String.valueOf(reaktorSessionService.getGlobalTakt()) + "'>" +
 				
-//				"<link rel=\"stylesheet\" href=\"http://code.jquery.com/ui/1.9.0/themes/base/jquery-ui.css\" />" + 
-//				"<script src=\"http://code.jquery.com/jquery-latest.min.js\" type=\"text/javascript\"></script>" + 
-//				"<script src=\"http://code.jquery.com/ui/1.9.0/jquery-ui.js\" type=\"text/javascript\"></script>" +
-//				"<script src=\"d3-stuff.js\" type=\"text/javascript\"></script>" +
-				"</head>" +
-				
 				"<body bgcolor=" + bgColor + ">";
 		String PAGE_FOOTER = "</body></html>";
 
