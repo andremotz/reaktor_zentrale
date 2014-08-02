@@ -43,8 +43,8 @@ public class ReaktorSessionService {
 
 	final String JDBC_DRIVER = "com.mysql.jdbc.Driver";
 	final String DB_URL = "jdbc:mysql://127.0.0.1/reaktor";
-	final String USER = "root";
-	final String PASS = "";
+	String mysqlUser;
+	String mysqlPass;
 
 	static Connection conn;
 	static Statement stmt;
@@ -202,6 +202,8 @@ public class ReaktorSessionService {
 			// get the property values
 			this.scriptpath = prop.getProperty("scriptPath");
 			this.fileSensorsAverage = prop.getProperty("fileSensorsAverage");
+			this.mysqlUser = prop.getProperty("mysqlUser");
+			this.mysqlPass = prop.getProperty("mysqlPass");
 
 		} catch (IOException ex) {
 			ex.printStackTrace();
@@ -271,7 +273,7 @@ public class ReaktorSessionService {
 		
 		String sql = "SELECT * FROM globalData";
 		try {
-			conn = DriverManager.getConnection(DB_URL,USER,PASS);
+			conn = DriverManager.getConnection(DB_URL,mysqlUser,mysqlPass);
 			stmt = conn.createStatement();
 			rs = stmt.executeQuery(sql);
 			
@@ -414,10 +416,9 @@ public class ReaktorSessionService {
 	public void readSerialFromArduino() {
 		// TODO Auto-generated method stub
 		// ProcessBuilder pb = new
-		// ProcessBuilder("/home/pi/sensordata/readSerialFromArduino.sh");
-		// ProcessBuilder pb = new
 		// ProcessBuilder("/home/pi/sensordata/readSerialFromArduino.py");
-		ProcessBuilder pb = null;
+		ProcessBuilder pb = new
+				ProcessBuilder("/home/pi/sensordata/readSerialFromArduino.sh");
 		try {
 			Process p = pb.start();
 		} catch (IOException e) {
@@ -446,7 +447,7 @@ public class ReaktorSessionService {
 		String sql = "UPDATE globalData SET secondsCompleted = ? WHERE id = 1";
 
 		try {
-			conn = DriverManager.getConnection(DB_URL, USER, PASS);
+			conn = DriverManager.getConnection(DB_URL, mysqlUser, mysqlPass);
 			PreparedStatement updateQuery = conn.prepareStatement(sql);
 			updateQuery.setInt(1, _secondsCompleted);
 			updateQuery.executeUpdate();
@@ -463,7 +464,7 @@ public class ReaktorSessionService {
 		String sql = "SELECT * FROM zielwerte";
 		
 		try {
-			conn = DriverManager.getConnection(DB_URL,USER,PASS);
+			conn = DriverManager.getConnection(DB_URL,mysqlUser,mysqlPass);
 			stmt = conn.createStatement();
 			rs = stmt.executeQuery(sql);
 			
@@ -508,7 +509,7 @@ public class ReaktorSessionService {
 		}		
 		
 		try {
-			conn = DriverManager.getConnection(DB_URL,USER,PASS);
+			conn = DriverManager.getConnection(DB_URL,mysqlUser,mysqlPass);
 			 PreparedStatement insertQuery = conn.prepareStatement(sql);
 			 insertQuery.setString(1, timestamp);
 			 insertQuery.setInt(2, 1);
