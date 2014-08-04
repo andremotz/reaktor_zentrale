@@ -21,6 +21,9 @@ import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.andremotz.reaktor.dao.Zielwert;
 
 /**
@@ -55,8 +58,12 @@ public class ReaktorSessionService {
 	int currentZielTemp;
 	private boolean isHeating;
 	private String fileSensorsAverage;
+	
+	Logger log4j = LogManager.getLogger(ReaktorSessionServlet.class
+	        .getName());
 
 	ReaktorSessionService() {
+		log4j.trace("ReaktorSessionService()");
 		getProperties();
 
 		tempInnen = 0f;
@@ -126,6 +133,7 @@ public class ReaktorSessionService {
 	}
 
 	public String getContentfromFile(String filename) {
+		log4j.trace("getContentfromFile(): " + filename);
 		String fileContent = null;
 		FileInputStream fstream = null;
 
@@ -156,6 +164,7 @@ public class ReaktorSessionService {
 	}
 
 	public List<Float> getSensorValuesAsArrayList(String toConvert) {
+		log4j.trace("getSensorValuesAsArrayList String to convert: " + toConvert);
 		List<Float> arrayListSensorValues = new ArrayList<Float>();
 
 		// Format vorher: <12.345|56.789>
@@ -246,14 +255,17 @@ public class ReaktorSessionService {
 		try {
 			Runtime rt = Runtime.getRuntime(); // step 1
 
-			String script;
+			String scriptToExecute;
 			if (isHeating) {
-				script = "switchArduinoOn.sh";
+				scriptToExecute = "switchArduinoOn.sh";
 			} else {
-				script = "switchArduinoOff.sh";
+				scriptToExecute = "switchArduinoOff.sh";
 			}
-
-			Process process = rt.exec(scriptpath + "/" + script); // step 2
+			
+			String script = scriptpath + "/" + scriptToExecute;
+			log4j.trace("switchArduino(): " + script);
+					
+			Process process = rt.exec(script); // step 2
 
 			InputStreamReader reader = // step 3
 			new InputStreamReader(process.getInputStream());
@@ -302,7 +314,6 @@ public class ReaktorSessionService {
 			conn.close();
 			
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
@@ -350,7 +361,8 @@ public class ReaktorSessionService {
 
 				// Sind wir im gr??nen Bereich?
 				if (tempAussen > currentZielTemp - 2
-						&& tempAussen < currentZielTemp + 100) {
+						&& tempAussen < currentZielTemp + 100
+						&& currentZielTemp != 0) {
 
 					int newSecondsCompleted = getSecondsCompleted()
 							+ globalTakt;
@@ -379,7 +391,14 @@ public class ReaktorSessionService {
 	}
 
 	private int getCelsiusFromLevel(int level, ArrayList<Zielwert> zielwerte) {
-		return zielwerte.get(level).getCelsius();
+		int celsius = 0;
+		try {
+			celsius =  zielwerte.get(level).getCelsius();
+		} catch (IndexOutOfBoundsException e) {
+			log4j.trace("Program completed");
+			
+		}
+		return celsius;
 
 	}
 
@@ -390,14 +409,13 @@ public class ReaktorSessionService {
 
 		int level = 0;
 		int secondsCounter = zielwerte.get(0).getSeconds();
+//		int secondsCounter = 0;
 
 		while (secondsCompleted > secondsCounter) {
 			try {
-				level++;
-				// secondsCounter = secondsCounter + (Integer)
-				// zielwerteSeconds.get(level);
 				secondsCounter = secondsCounter
 						+ zielwerte.get(level).getSeconds();
+				level++;
 			} catch (ArrayIndexOutOfBoundsException e) {
 				// Seconds Completed h??her als irgendwas,
 				// z??hle einfach Seconds Counter um 1 hoch, damit er fertig
@@ -414,18 +432,15 @@ public class ReaktorSessionService {
 	 * Executes local script to save sensor values into String file
 	 */
 	public void readSerialFromArduino() {
-		// TODO Auto-generated method stub
-		// ProcessBuilder pb = new
-		// ProcessBuilder("/home/pi/sensordata/readSerialFromArduino.py");
 		ProcessBuilder pb = new
 				ProcessBuilder("/home/pi/sensordata/readSerialFromArduino.sh");
 		try {
 			Process p = pb.start();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log4j.error("readSerialFromArduino() IO Exception");
 		} catch (Exception e) {
-			e.printStackTrace();
+			log4j.error("readSerialFromArduino() Exception");
 
 		}
 	}
@@ -452,7 +467,6 @@ public class ReaktorSessionService {
 			updateQuery.setInt(1, _secondsCompleted);
 			updateQuery.executeUpdate();
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		secondsCompleted = _secondsCompleted;
@@ -484,7 +498,6 @@ public class ReaktorSessionService {
 			conn.close();
 			
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
@@ -521,7 +534,6 @@ public class ReaktorSessionService {
 			 
 			 insertQuery.executeUpdate();
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		

@@ -48,6 +48,9 @@ public class ReaktorSessionServlet extends HttpServlet {
 		
 		String PAGE_HEADER = "<html><head>" +
 				"<meta charset='utf-8'> " +
+				"<style>html, body { background:#4d4d4d; }"
+				+ "body{ color:#ccc; margin:10; padding:0; "
+				+ "font-family: 'Andale Mono', AndaleMono, monospace;}</style>" + 
 				"<meta http-equiv='refresh' content='" + String.valueOf(reaktorSessionService.getGlobalTakt()) + "'>" +
 				
 				"<body bgcolor=" + bgColor + ">";
@@ -55,7 +58,7 @@ public class ReaktorSessionServlet extends HttpServlet {
 
 		writer.println(PAGE_HEADER);
 		writer.println("<h1>Reaktor Schaltzentrale</h1>");
-		writer.println("Held der Brauerei!");
+		writer.println("Build date: 2014/08/04");
 
 		List<Float> sensorsTemps = new ArrayList<Float>();
 		
